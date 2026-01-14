@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Moka 2: Revenge of the Roast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Tailwind for UI layout utility -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['"Orbitron"', 'sans-serif'],
+                        'mono': ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'neon-blue': '#00f3ff',
+                        'neon-pink': '#ff00ff',
+                        'neon-green': '#00ff00',
+                        'dark-bg': '#050505',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-dark-bg text-white overflow-hidden select-none touch-none">
+
+    <!-- Title Screen -->
+    <div id="title-screen"
+        class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 transition-opacity duration-500">
+        <h1
+            class="text-6xl md:text-8xl font-orbitron font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-purple-500 to-neon-pink animate-pulse mb-8 drop-shadow-[0_0_15px_rgba(255,0,255,0.5)]">
+            MOKA 2
+        </h1>
+        <p class="text-xl md:text-2xl font-mono text-neon-blue mb-12 tracking-widest text-shadow-glow">REVENGE OF THE
+            ROAST</p>
+
+        <div class="flex flex-col gap-4 w-64">
+            <button id="btn-story"
+                class="btn-neon group relative px-8 py-4 bg-transparent border-2 border-neon-blue text-neon-blue font-orbitron font-bold uppercase tracking-wider hover:bg-neon-blue hover:text-black transition-all duration-200 overflow-hidden">
+                <span class="relative z-10">Story Mode</span>
+                <div
+                    class="absolute inset-0 bg-neon-blue/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-0 transition-transform duration-300">
+                </div>
+            </button>
+
+            <button id="btn-endless"
+                class="btn-neon group relative px-8 py-4 bg-transparent border-2 border-neon-pink text-neon-pink font-orbitron font-bold uppercase tracking-wider hover:bg-neon-pink hover:text-black transition-all duration-200 overflow-hidden">
+                <span class="relative z-10">Endless</span>
+                <div
+                    class="absolute inset-0 bg-neon-pink/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-0 transition-transform duration-300">
+                </div>
+            </button>
+
+            <button id="btn-editor"
+                class="btn-neon group relative px-8 py-4 bg-transparent border-2 border-neon-green text-neon-green font-orbitron font-bold uppercase tracking-wider hover:bg-neon-green hover:text-black transition-all duration-200 overflow-hidden">
+                <span class="relative z-10">Level Editor</span>
+                <div
+                    class="absolute inset-0 bg-neon-green/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-0 transition-transform duration-300">
+                </div>
+            </button>
+        </div>
+
+        <div class="mt-8 text-xs font-mono text-gray-500">v1.0.0 | Built for Moka</div>
+    </div>
+
+    <!-- HUD Overlay -->
+    <div id="game-ui" class="absolute inset-0 pointer-events-none z-10 hidden">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-start p-4">
+            <div class="flex flex-col gap-2">
+                <!-- Health -->
+                <div class="flex items-center gap-2">
+                    <div class="text-neon-pink text-xs font-mono">VITALS</div>
+                    <div id="health-bar"
+                        class="flex gap-1 text-2xl text-neon-pink drop-shadow-[0_0_5px_rgba(255,0,255,0.8)]">
+                        ♥♥♥
+                    </div>
+                </div>
+                <!-- Coffee Rush Meter -->
+                <div class="w-48 h-2 bg-gray-900 border border-gray-700 rounded-full relative overflow-hidden">
+                    <div id="rush-meter"
+                        class="h-full bg-gradient-to-r from-orange-500 to-yellow-400 w-0 transition-all duration-100 box-shadow-[0_0_10px_orange]">
+                    </div>
+                </div>
+                <div class="text-[10px] text-yellow-500 font-mono tracking-tighter">COFFEE RUSH // <span
+                        id="rush-text">0%</span></div>
+            </div>
+
+            <!-- Score & Wave -->
+            <div class="text-right">
+                <div class="text-4xl font-orbitron font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                    id="score-display">0</div>
+                <div class="text-sm font-mono text-neon-blue">WAVE <span id="wave-display">1</span></div>
+                <div id="enemies-left-container" class="text-xs font-mono text-red-500 mt-1">ENEMIES LEFT: <span
+                        id="enemies-left">--</span></div>
+                <div id="weapon-display" class="text-xs font-mono text-gray-400 mt-1">GATLING PEA</div>
+            </div>
+        </div>
+
+        <!-- Touch Controls (Mobile) -->
+        <div class="md:hidden absolute bottom-4 left-4 right-4 flex justify-between pointer-events-auto">
+            <div id="joystick-zone"
+                class="w-32 h-32 border-2 border-white/10 rounded-full flex items-center justify-center relative touch-none">
+                <div id="joystick-knob" class="w-12 h-12 bg-white/20 rounded-full absolute"></div>
+            </div>
+
+            <div class="flex gap-4 items-end">
+                <button id="btn-dash"
+                    class="w-20 h-20 bg-neon-blue/20 border-2 border-neon-blue rounded-full active:bg-neon-blue/50 text-white font-bold text-xs">DASH</button>
+                <button id="btn-shoot"
+                    class="w-24 h-24 bg-neon-pink/20 border-2 border-neon-pink rounded-full active:bg-neon-pink/50 text-white font-bold text-xs">FIRE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cutscene Overlay -->
+    <div id="story-overlay" class="absolute inset-0 z-40 bg-black hidden flex-col items-center justify-center p-8">
+        <div class="max-w-2xl w-full border-t-2 border-b-2 border-neon-blue bg-black/50 p-6 backdrop-blur-md">
+            <h2 id="story-title" class="text-3xl font-orbitron text-neon-blue mb-4">LEVEL 1</h2>
+            <div id="story-text" class="font-mono text-lg text-white leading-relaxed whitespace-pre-line min-h-[150px]">
+                <!-- Typewriter text goes here -->
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="btn-continue" class="text-neon-green font-mono animate-pulse hover:underline hidden">>>
+                    PROCEED</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Editor Overlay -->
+    <div id="editor-ui" class="absolute inset-0 z-30 hidden pointer-events-none">
+        <div
+            class="absolute top-0 right-0 p-4 bg-gray-900/90 border-l border-b border-gray-700 pointer-events-auto flex flex-col gap-2 w-64 h-full overflow-y-auto">
+            <h3 class="font-orbitron text-neon-green text-center border-b border-gray-700 pb-2 mb-2">BUILDER MODE</h3>
+
+            <div class="text-xs text-gray-400 mb-1">TOOLS</div>
+            <div class="grid grid-cols-4 gap-2 mb-4" id="tool-palette">
+                <!-- Javascript will populate this -->
+            </div>
+
+            <div class="text-xs text-gray-400 mb-1">ACTIONS</div>
+            <button id="btn-test-level"
+                class="bg-green-700 hover:bg-green-600 text-white text-xs py-2 px-2 rounded mb-1 font-mono">▶ TEST
+                PLAY</button>
+            <button id="btn-export-level"
+                class="bg-blue-700 hover:bg-blue-600 text-white text-xs py-2 px-2 rounded mb-1 font-mono">📋 COPY
+                JSON</button>
+            <button id="btn-clear-level"
+                class="bg-red-900 hover:bg-red-700 text-white text-xs py-2 px-2 rounded font-mono">🗑 CLEAR ALL</button>
+
+            <div class="mt-auto pt-4 border-t border-gray-700">
+                <button id="btn-exit-editor"
+                    class="w-full border border-gray-600 text-gray-400 hover:text-white py-2 text-xs font-mono">EXIT
+                    EDITOR</button>
+            </div>
+        </div>
+
+        <!-- Editor Grid Hint is drawn on canvas -->
+    </div>
+
+    <canvas id="gameCanvas" class="block w-full h-full bg-dark-bg"></canvas>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+
+</body>
+
+</html>

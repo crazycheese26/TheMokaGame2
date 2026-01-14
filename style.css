@@ -1,0 +1,102 @@
+:root {
+    --neon-blue: #00f3ff;
+    --neon-pink: #d946ef;
+    --neon-green: #00ff00;
+    --bg-color: #050505;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Custom Scrollbar for editor */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #111;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+/* Text glow effects */
+.text-shadow-glow {
+    text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+}
+
+/* Base Canvas */
+canvas {
+    image-rendering: pixelated; /* Optional for pixel art feel, but we are using vector shapes mostly. Keeping it sharp. */
+}
+
+/* Scanline effect wrapper (optional overlay) */
+.scanlines {
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+    );
+    background-size: 100% 4px;
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+}
+
+/* Button Animations */
+@keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+    }
+    20%, 24%, 55% {
+        opacity: 0.5;
+        box-shadow: none;
+    }
+}
+
+.btn-neon:hover {
+    box-shadow: 0 0 15px currentColor;
+    text-shadow: 0 0 5px currentColor;
+}
+
+/* UI Elements */
+#story-text {
+    border-right: 2px solid var(--neon-green);
+    animation: blinkCursor 0.7s infinite;
+}
+
+@keyframes blinkCursor {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: var(--neon-green); }
+}
+
+/* Editor Palette Items */
+.palette-item {
+    width: 40px;
+    height: 40px;
+    background: #222;
+    border: 1px solid #444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.palette-item:hover, .palette-item.selected {
+    border-color: var(--neon-green);
+    background: #333;
+    box-shadow: 0 0 5px var(--neon-green);
+}
+
+.palette-item img, .palette-item div {
+    pointer-events: none;
+}
