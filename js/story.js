@@ -2,7 +2,7 @@ import { game } from './main.js';
 
 const LEVEL_SEQUENCES = {
     0: [ // Level 1: The Kitchen Counter (Intro -> EspressoBot)
-        { time: 1, type: 'DIALOGUE', text: "SYSTEM: CLEANING PROTOCOL INITIATED." },
+        // Removed disruptive intro dialogue
         { time: 3, type: 'BASIC', count: 1, pos: 'TOP' },
         { time: 6, type: 'BASIC', count: 2, pos: 'RANDOM' },
         { time: 10, type: 'BASIC', count: 3, pos: 'CIRCLE' },
