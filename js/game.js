@@ -9,6 +9,7 @@ class Heart {
         this.size = 10;
         this.active = true;
         this.bobOffset = 0;
+        this.type = 'HEART';
     }
     update(dtFactor) {
         this.bobOffset += 0.1 * dtFactor;
@@ -32,11 +33,40 @@ class Heart {
     }
 }
 
+class Milk {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 15;
+        this.active = true;
+        this.bobOffset = 0;
+        this.type = 'MILK';
+    }
+    update(dtFactor) {
+        this.bobOffset += 0.1 * dtFactor;
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y + Math.sin(this.bobOffset) * 5);
+        ctx.fillStyle = '#ffffff'; // White
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 10;
+
+        // Milk Bottle Shape
+        ctx.beginPath();
+        ctx.fillRect(-6, -10, 12, 16); // Body
+        ctx.fillRect(-3, -14, 6, 4);   // Neck
+        ctx.fill();
+
+        ctx.restore();
+    }
+}
+
 export class Game {
     constructor() {
         this.entities = [];
         this.bullets = [];
-        this.items = []; // Hearts etc
+        this.items = []; // Hearts, Milk etc
         this.particles = new ParticleSystem();
         this.player = new Player(0, 0);
         this.wave = 1;
@@ -319,11 +349,14 @@ export class Game {
                     if (e instanceof MokaBoss || e instanceof EspressoBot || e instanceof FrappeQueen) {
                         if (!e.active) {
                             this.bossDefeated = true;
-                            // Spawn Heart
-                            this.items.push(new Heart(e.x, e.y));
 
-                            // Delay win slightly so they can pick up heart? 
-                            // Or just trigger win after delay.
+                            if (e instanceof MokaBoss) {
+                                // Moka Man drops the special milk
+                                this.items.push(new Milk(e.x, e.y));
+                            } else {
+                                this.items.push(new Heart(e.x, e.y));
+                            }
+
                             setTimeout(() => this.handleWin(), 2000);
                         }
                     }
@@ -348,19 +381,35 @@ export class Game {
             const item = this.items[i];
             const dist = Math.hypot(this.player.x - item.x, this.player.y - item.y);
             if (dist < this.player.size + item.size) {
-                // Pickup
-                if (this.player.hp < 3) { // Max HP 3
-                    this.player.hp++;
-                    this.updateUI();
-                    item.active = false;
-                    this.particles.createExplosion(item.x, item.y, '#ef4444');
+                item.active = false;
+
+                if (item.type === 'MILK') {
+                    // Super Item: Full Heal + Coffee Rush
+                    this.player.hp = 3;
+                    this.coffeeRush = 100;
+                    this.score += 1000;
+                    this.particles.createExplosion(item.x, item.y, '#ffffff');
+
+                    // Optional visual feedback text
+                    const floatText = document.createElement('div');
+                    floatText.innerText = "CALCIUM BOOST!";
+                    floatText.className = "absolute text-white font-bold text-xl animate-bounce";
+                    floatText.style.left = (window.innerWidth / 2) + 'px';
+                    floatText.style.top = (window.innerHeight / 2) + 'px';
+                    document.body.appendChild(floatText);
+                    setTimeout(() => floatText.remove(), 1000);
+
                 } else {
-                    // Score bonus if full health?
-                    this.score += 500;
-                    this.updateUI();
-                    item.active = false;
-                    this.particles.createExplosion(item.x, item.y, '#ffd700');
+                    // Heart
+                    if (this.player.hp < 3) {
+                        this.player.hp++;
+                        this.particles.createExplosion(item.x, item.y, '#ef4444');
+                    } else {
+                        this.score += 500;
+                        this.particles.createExplosion(item.x, item.y, '#ffd700');
+                    }
                 }
+                this.updateUI();
             }
         }
     }
