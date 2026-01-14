@@ -4,11 +4,13 @@ class Bullet {
     constructor(x, y, angle) {
         this.x = x;
         this.y = y;
-        this.vx = Math.cos(angle) * 15;
-        this.vy = Math.sin(angle) * 15;
-        this.size = 4;
+        this.vx = Math.cos(angle) * 18; // Slightly faster
+        this.vy = Math.sin(angle) * 18;
+        this.angle = angle;
+        this.size = 3;
         this.active = true;
-        this.color = '#ffff00';
+        this.color = '#00f3ff'; // Neon Cyan
+        this.trailTimer = 0;
     }
     update() {
         this.x += this.vx;
@@ -16,18 +18,33 @@ class Bullet {
         if (this.x < 0 || this.x > window.gameState.width || this.y < 0 || this.y > window.gameState.height) {
             this.active = false;
         }
-        // Trail effect
-        if (Math.random() < 0.3) game.particles.create(this.x, this.y, this.color, 2);
+        // Trail effect - more frequent
+        this.trailTimer++;
+        if (this.trailTimer % 2 === 0) game.particles.create(this.x, this.y, '#ffffff', 1);
     }
     draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // Glow
         ctx.shadowColor = this.color;
         ctx.shadowBlur = 10;
+
+        // Core (White hot)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 10, 3, 0, 0, Math.PI * 2); // Capsule shape
         ctx.fill();
-        ctx.shadowBlur = 0;
+
+        // Outer Aura (Cyan)
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = 0.6;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 14, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
     }
 }
 
@@ -35,13 +52,17 @@ export class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.size = 15;
+        this.size = 20; // Adjusted for image
         this.speed = 6;
         this.hp = 3;
-        this.color = '#ffffff';
+        this.color = '#00f3ff';
         this.dashCooldown = 0;
         this.invincibleTimer = 0;
         this.angle = 0;
+
+        // Load Sprite
+        this.sprite = new Image();
+        this.sprite.src = "Spoon.webp";
     }
 
     reset() {
@@ -79,10 +100,10 @@ export class Player {
     }
 
     shoot() {
-        game.bullets.push(new Bullet(this.x, this.y, this.angle));
+        game.bullets.push(new Bullet(this.x + Math.cos(this.angle) * 20, this.y + Math.sin(this.angle) * 20, this.angle));
         // Recoil
-        this.x -= Math.cos(this.angle) * 2;
-        this.y -= Math.sin(this.angle) * 2;
+        this.x -= Math.cos(this.angle) * 4;
+        this.y -= Math.sin(this.angle) * 4;
     }
 
     dash() {
@@ -90,8 +111,8 @@ export class Player {
 
         const mouse = window.gameState.mouse;
         const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-        this.x += Math.cos(angle) * 100;
-        this.y += Math.sin(angle) * 100;
+        this.x += Math.cos(angle) * 120;
+        this.y += Math.sin(angle) * 120;
         this.dashCooldown = 60;
 
         game.particles.createExplosion(this.x, this.y, '#00f3ff');
@@ -101,7 +122,7 @@ export class Player {
         if (this.invincibleTimer > 0) return false;
         this.hp--;
         this.invincibleTimer = 60;
-        game.particles.createExplosion(this.x, this.y, '#ff0000');
+        game.particles.createExplosion(this.x, this.y, '#ffffff'); // White explosion
         return this.hp <= 0;
     }
 
@@ -110,21 +131,28 @@ export class Player {
 
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
+
+        // Base Rotation (Aim)
+        // Image is upright (tip at top), so we need to add 90 degrees (PI/2) 
+        // because 0 degrees in canvas is 3 o'clock (Right), but our sprite is 12 o'clock (Up).
+        ctx.rotate(this.angle + Math.PI / 2);
 
         // Glow
         ctx.shadowColor = this.color;
         ctx.shadowBlur = 15;
 
-        // Body
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-10, -10, 20, 20);
-
-        // Gun
-        ctx.fillStyle = '#ccc';
-        ctx.fillRect(10, -4, 15, 8);
+        // Draw Sprite
+        // Assuming sprite is roughly square or we draw it centered
+        const w = 40;
+        const h = 60; // Make it a bit elongated
+        try {
+            ctx.drawImage(this.sprite, -w / 2, -h / 2, w, h);
+        } catch (e) {
+            // Fallback drawing if image fails/not loaded yet
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-5, -20, 10, 40);
+        }
 
         ctx.restore();
-        ctx.shadowBlur = 0;
     }
 }

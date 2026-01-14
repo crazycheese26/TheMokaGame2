@@ -36,7 +36,7 @@ export class Story {
         this.overlay.classList.remove('hidden');
         this.overlay.classList.add('flex');
 
-        const data = STORY_DATA[this.currentLevel] || { title: "VICTORY", text: "You have cleansed the pot.\nReturn to the cupboard, hero." };
+        const data = STORY_DATA[this.currentLevel] || { title: "VICTORY", text: "You stayed clean and sexy.\nReturn to the cupboard, hero." };
 
         this.titleEl.innerText = data.title;
         this.textEl.innerText = "";

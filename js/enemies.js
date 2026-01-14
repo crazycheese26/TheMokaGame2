@@ -3,7 +3,7 @@ export class Enemy {
         this.x = x;
         this.y = y;
         this.size = 20;
-        this.color = '#ef4444'; // Red-500
+        this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
         this.speed = 2 + (level * 0.1);
         this.hp = 1 + Math.floor(level / 5);
         this.active = true;
