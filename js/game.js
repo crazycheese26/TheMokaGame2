@@ -10,8 +10,8 @@ class Heart {
         this.active = true;
         this.bobOffset = 0;
     }
-    update() {
-        this.bobOffset += 0.1;
+    update(dtFactor) {
+        this.bobOffset += 0.1 * dtFactor;
     }
     draw(ctx) {
         ctx.save();
@@ -34,7 +34,6 @@ class Heart {
 
 export class Game {
     constructor() {
-        this.entities = [];
         this.entities = [];
         this.bullets = [];
         this.items = []; // Hearts etc
@@ -341,6 +340,27 @@ export class Game {
                     this.handleGameOver();
                 }
                 this.updateUI();
+            }
+        }
+
+        // Player vs Items
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const item = this.items[i];
+            const dist = Math.hypot(this.player.x - item.x, this.player.y - item.y);
+            if (dist < this.player.size + item.size) {
+                // Pickup
+                if (this.player.hp < 3) { // Max HP 3
+                    this.player.hp++;
+                    this.updateUI();
+                    item.active = false;
+                    this.particles.createExplosion(item.x, item.y, '#ef4444');
+                } else {
+                    // Score bonus if full health?
+                    this.score += 500;
+                    this.updateUI();
+                    item.active = false;
+                    this.particles.createExplosion(item.x, item.y, '#ffd700');
+                }
             }
         }
     }
