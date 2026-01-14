@@ -2,10 +2,42 @@ import { Player } from './player.js';
 import { Enemy, MokaBoss, EspressoBot, FrappeQueen } from './enemies.js';
 import { ParticleSystem } from './particles.js';
 
+class Heart {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 10;
+        this.active = true;
+        this.bobOffset = 0;
+    }
+    update() {
+        this.bobOffset += 0.1;
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y + Math.sin(this.bobOffset) * 5);
+        ctx.fillStyle = '#ef4444'; // Red
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 10;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 5);
+        ctx.bezierCurveTo(-5, 0, -10, 0, -10, -5);
+        ctx.bezierCurveTo(-10, -12, 0, -12, 0, -5);
+        ctx.bezierCurveTo(0, -12, 10, -12, 10, -5);
+        ctx.bezierCurveTo(10, 0, 5, 0, 0, 5);
+        ctx.fill();
+
+        ctx.restore();
+    }
+}
+
 export class Game {
     constructor() {
         this.entities = [];
+        this.entities = [];
         this.bullets = [];
+        this.items = []; // Hearts etc
         this.particles = new ParticleSystem();
         this.player = new Player(0, 0);
         this.wave = 1;
@@ -171,6 +203,11 @@ export class Game {
 
         this.particles.update();
 
+        this.items.forEach((item, i) => {
+            item.update();
+            if (!item.active) this.items.splice(i, 1);
+        });
+
         this.checkCollisions();
     }
 
@@ -266,8 +303,11 @@ export class Game {
                         this.coffeeRush = Math.min(100, this.coffeeRush + 5);
                         this.enemiesInWave--;
 
+                        this.enemiesInWave--;
+
                         if (this.enemiesInWave <= 0) {
-                            if (this.gameMode === 'ENDLESS' || this.wave < this.maxWaves) {
+                            // If sequencer, we rely on event processing, but this check is for legacy/endless
+                            if (this.gameMode === 'ENDLESS') {
                                 this.wave++;
                                 this.startWave();
                             }
@@ -275,9 +315,16 @@ export class Game {
                         this.updateUI();
                     }
 
-                    if (e instanceof MokaBoss && !e.active) {
-                        this.bossDefeated = true;
-                        this.handleWin();
+                    if (e instanceof MokaBoss || e instanceof EspressoBot || e instanceof FrappeQueen) {
+                        if (!e.active) {
+                            this.bossDefeated = true;
+                            // Spawn Heart
+                            this.items.push(new Heart(e.x, e.y));
+
+                            // Delay win slightly so they can pick up heart? 
+                            // Or just trigger win after delay.
+                            setTimeout(() => this.handleWin(), 2000);
+                        }
                     }
                     break;
                 }
@@ -311,6 +358,7 @@ export class Game {
         const ctx = window.gameState.ctx;
         this.bullets.forEach(b => b.draw(ctx));
         this.entities.forEach(e => e.draw(ctx));
+        this.items.forEach(i => i.draw(ctx));
         this.particles.draw(ctx);
         this.player.draw(ctx);
     }

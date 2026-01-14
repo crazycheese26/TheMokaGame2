@@ -141,6 +141,14 @@ export class Player {
         ctx.shadowColor = this.color;
         ctx.shadowBlur = 15;
 
+        // Dirty State (Low Health)
+        if (this.hp <= 1) {
+            ctx.filter = 'sepia(0.8) brightness(0.7)'; // Brown/Dirty look
+            ctx.shadowColor = '#5c4033'; // Brown glow
+        } else {
+            ctx.filter = 'none';
+        }
+
         // Draw Sprite
         // Assuming sprite is roughly square or we draw it centered
         const w = 40;
