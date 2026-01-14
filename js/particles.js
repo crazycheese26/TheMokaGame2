@@ -29,13 +29,13 @@ export class ParticleSystem {
         }
     }
 
-    update() {
+    update(dtFactor) {
         for (let i = 0; i < this.poolSize; i++) {
             const p = this.pool[i];
             if (p.active) {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= p.decay;
+                p.x += p.vx * dtFactor;
+                p.y += p.vy * dtFactor;
+                p.life -= p.decay * dtFactor;
                 if (p.life <= 0) p.active = false;
             }
         }

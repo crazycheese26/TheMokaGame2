@@ -132,15 +132,17 @@ export class Game {
         this.player.shoot();
     }
 
-    update() {
+    update(dt) {
         if (this.isPaused) return;
+
+        const dtFactor = dt * 60; // Normalize to 60 FPS (1.0 at 60fps)
 
         // Spawning Logic
 
         if (this.isSequenced) {
             // Sequencer Logic
             if (!this.isWaitingForClear) {
-                this.levelTimer += 1 / 60;
+                this.levelTimer += dt; // Real seconds
             } else {
                 if (this.entities.length === 0) {
                     this.isWaitingForClear = false;
@@ -164,7 +166,7 @@ export class Game {
             }
 
         } else if (!this.bossSpawned) {
-            this.spawnTimer++;
+            this.spawnTimer += dtFactor;
             // In story mode, stop spawning if we reached boss wave
             const canSpawn = this.gameMode === 'ENDLESS' || this.wave < this.maxWaves;
 
@@ -189,22 +191,22 @@ export class Game {
         }
 
         // Entities
-        this.player.update();
+        this.player.update(dtFactor);
 
         this.bullets.forEach((b, i) => {
-            b.update();
+            b.update(dtFactor);
             if (!b.active) this.bullets.splice(i, 1);
         });
 
         this.entities.forEach((e, i) => {
-            e.update(this.player);
+            e.update(this.player, dtFactor);
             if (!e.active) this.entities.splice(i, 1);
         });
 
-        this.particles.update();
+        this.particles.update(dtFactor);
 
         this.items.forEach((item, i) => {
-            item.update();
+            item.update(dtFactor);
             if (!item.active) this.items.splice(i, 1);
         });
 

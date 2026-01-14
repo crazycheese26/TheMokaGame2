@@ -17,11 +17,11 @@ export class Enemy {
         }
     }
 
-    update(player) {
+    update(player, dtFactor) {
         // Chase Logic
         const angle = Math.atan2(player.y - this.y, player.x - this.x);
-        this.x += Math.cos(angle) * this.speed;
-        this.y += Math.sin(angle) * this.speed;
+        this.x += Math.cos(angle) * this.speed * dtFactor;
+        this.y += Math.sin(angle) * this.speed * dtFactor;
     }
 
     draw(ctx) {
@@ -51,13 +51,13 @@ export class MokaBoss extends Enemy {
         this.phase = 0;
     }
 
-    update(player) {
+    update(player, dtFactor) {
         // Boss Logic
-        this.phaseTimer = (this.phaseTimer || 0) + 1;
+        this.phaseTimer = (this.phaseTimer || 0) + (1 * dtFactor);
 
         if (this.action === 'CHARGE') {
-            this.x += Math.cos(this.angle) * this.speed * 3;
-            this.y += Math.sin(this.angle) * this.speed * 3;
+            this.x += Math.cos(this.angle) * this.speed * 3 * dtFactor;
+            this.y += Math.sin(this.angle) * this.speed * 3 * dtFactor;
             if (this.phaseTimer > 60) {
                 this.action = 'CHASE';
                 this.phaseTimer = 0;
@@ -66,11 +66,11 @@ export class MokaBoss extends Enemy {
             // Chase
             const angle = Math.atan2(player.y - this.y, player.x - this.x);
             this.angle = angle;
-            this.x += Math.cos(angle) * this.speed;
-            this.y += Math.sin(angle) * this.speed;
+            this.x += Math.cos(angle) * this.speed * dtFactor;
+            this.y += Math.sin(angle) * this.speed * dtFactor;
 
             // Randomly Charge
-            if (this.phaseTimer > 120 && Math.random() < 0.02) {
+            if (this.phaseTimer > 120 && Math.random() < (0.02 * dtFactor)) {
                 this.action = 'CHARGE';
                 this.phaseTimer = 0;
             }
@@ -129,8 +129,8 @@ export class EspressoBot extends Enemy {
         this.phaseTimer = 0;
     }
 
-    update(player) {
-        this.phaseTimer++;
+    update(player, dtFactor) {
+        this.phaseTimer += 1 * dtFactor;
 
         if (this.phaseTimer > 120) {
             // Teleport / Zip
@@ -141,8 +141,8 @@ export class EspressoBot extends Enemy {
         } else {
             // Jittery chase
             const angle = Math.atan2(player.y - this.y, player.x - this.x);
-            this.x += Math.cos(angle) * this.speed;
-            this.y += Math.sin(angle) * this.speed;
+            this.x += Math.cos(angle) * this.speed * dtFactor;
+            this.y += Math.sin(angle) * this.speed * dtFactor;
         }
 
         // Bounds
@@ -182,13 +182,13 @@ export class FrappeQueen extends Enemy {
         this.spawnCooldown = 0;
     }
 
-    update(player) {
+    update(player, dtFactor) {
         // Slow approach
         const angle = Math.atan2(player.y - this.y, player.x - this.x);
-        this.x += Math.cos(angle) * this.speed;
-        this.y += Math.sin(angle) * this.speed;
+        this.x += Math.cos(angle) * this.speed * dtFactor;
+        this.y += Math.sin(angle) * this.speed * dtFactor;
 
-        this.spawnCooldown++;
+        this.spawnCooldown += 1 * dtFactor;
         if (this.spawnCooldown > 300) { // Every 5s
             // Spawn foam minions (simulated by Game logic ideally, but check if we can spawn here)
             // Since we don't have access to Game.entities here easily without circular dep or passing game,

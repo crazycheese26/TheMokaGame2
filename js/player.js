@@ -12,15 +12,18 @@ class Bullet {
         this.color = '#00f3ff'; // Neon Cyan
         this.trailTimer = 0;
     }
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
+    update(dtFactor) {
+        this.x += this.vx * dtFactor;
+        this.y += this.vy * dtFactor;
         if (this.x < 0 || this.x > window.gameState.width || this.y < 0 || this.y > window.gameState.height) {
             this.active = false;
         }
         // Trail effect - more frequent
-        this.trailTimer++;
-        if (this.trailTimer % 2 === 0) game.particles.create(this.x, this.y, '#ffffff', 1);
+        this.trailTimer += dtFactor;
+        if (this.trailTimer >= 2) {
+            game.particles.create(this.x, this.y, '#ffffff', 1);
+            this.trailTimer = 0;
+        }
     }
     draw(ctx) {
         ctx.save();
@@ -71,7 +74,7 @@ export class Player {
         this.invincibleTimer = 0;
     }
 
-    update() {
+    update(dtFactor) {
         // Movement
         const keys = window.gameState.keys;
         let dx = 0, dy = 0;
@@ -82,8 +85,8 @@ export class Player {
 
         if (dx !== 0 || dy !== 0) {
             const len = Math.hypot(dx, dy);
-            this.x += (dx / len) * this.speed;
-            this.y += (dy / len) * this.speed;
+            this.x += (dx / len) * this.speed * dtFactor;
+            this.y += (dy / len) * this.speed * dtFactor;
         }
 
         // Mouse Aim
@@ -95,8 +98,8 @@ export class Player {
         this.y = Math.max(this.size, Math.min(window.gameState.height - this.size, this.y));
 
         // Timers
-        if (this.dashCooldown > 0) this.dashCooldown--;
-        if (this.invincibleTimer > 0) this.invincibleTimer--;
+        if (this.dashCooldown > 0) this.dashCooldown -= dtFactor;
+        if (this.invincibleTimer > 0) this.invincibleTimer -= dtFactor;
     }
 
     shoot() {

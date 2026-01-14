@@ -50,12 +50,12 @@ window.addEventListener('mousemove', (e) => {
 });
 // Touch support
 window.addEventListener('touchstart', (e) => {
-    if(e.target.tagName !== 'BUTTON') {
+    if (e.target.tagName !== 'BUTTON') {
         window.gameState.mouse.isDown = true;
         window.gameState.mouse.x = e.touches[0].clientX;
         window.gameState.mouse.y = e.touches[0].clientY;
     }
-}, {passive: false});
+}, { passive: false });
 window.addEventListener('touchend', () => window.gameState.mouse.isDown = false);
 
 // Init Systems
@@ -89,27 +89,29 @@ document.getElementById('btn-editor').addEventListener('click', () => {
 });
 
 // Main Loop
+// Main Loop
 function loop(timestamp) {
+    if (!window.gameState.lastTime) window.gameState.lastTime = timestamp;
     const dt = (timestamp - window.gameState.lastTime) / 1000;
     window.gameState.lastTime = timestamp;
-    window.gameState.dt = Math.min(dt, 0.1); // Cap dt
+    window.gameState.dt = Math.min(dt, 0.1); // Cap dt to prevent huge jumps on lag spike
 
     // Clear
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw Background Grid (Syntrowave style)
     drawGrid(timestamp);
 
     // Update & Draw based on mode
     if (window.gameState.mode === 'PLAY') {
-        game.update();
+        game.update(window.gameState.dt);
         game.draw();
     } else if (window.gameState.mode === 'EDITOR') {
-        editor.update();
+        editor.update(window.gameState.dt);
         editor.draw();
     } else if (window.gameState.mode === 'CUTSCENE') {
-        story.update();
+        story.update(window.gameState.dt);
         // background is enough
     }
 
@@ -120,11 +122,11 @@ function drawGrid(time) {
     ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    
+
     // Moving grid floor effect
     const speed = 50;
     const offset = (time * 0.05) % 50;
-    
+
     for (let x = 0; x <= canvas.width; x += 50) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
